@@ -1,14 +1,57 @@
 version: "3.4"
 services:
- vite_docker:
-   image: node:alpine
-   container_name: vite_docker
-   entrypoint: /bin/sh
-   ports:
-     - 8000:8000
-   working_dir: /srv/app
-   volumes:
-     - type: bind
-       source: ./
-       target: /srv/app
-   tty: true
+  frontend:
+    build:
+      context: ./
+      dockerfile: Dockerfile.frontend
+    container_name: frontend_container
+    ports:
+      - 8000:8000
+    working_dir: /srv/app
+    depends_on: 
+      - backend
+    volumes:
+      - type: bind
+        source: ./
+        target: /srv/app
+    tty: true
+
+  backend:
+    build:
+      context: ../../oski_test_task/
+      dockerfile: Dockerfile.backend
+    container_name: backend_container
+    ports:
+      - 3000:3000
+    depends_on:
+      - mysql
+    networks:
+      - default
+    command: ["sh", "-c", "until nc -z -w 5 mysql 3306; do sleep 1; done && node ./src/app.js"]
+    environment:
+      - HOST=mysql_container
+      - PORT=3306
+      - USER=root
+      - PASSWORD=Sql_root_1488
+      - DATABASE=users-tests
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: Sql_root_1488
+      MYSQL_DATABASE: users-tests
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+    ports:
+      - 3307:3306
+    restart: always
+    networks:
+      - default

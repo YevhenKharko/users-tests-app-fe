@@ -14,7 +14,7 @@ export const SingleUserPage: FC<SingleUserPageProps> = ({ user, setCurrentTest }
   }
   const { id, name, user_name, created_at, updated_at } = user;
   return (
-    <div className="hero is-fullheight is-success is-flex is-justify-content-center is-align-items-center">
+    <div className="hero is-fullheight is-light is-flex is-justify-content-center is-align-items-center">
       <SingleUser id={id} name={name} user_name={user_name} created_at={created_at} updated_at={updated_at} setCurrentTest={setCurrentTest} />
     </div>
   )
